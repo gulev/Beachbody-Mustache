@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+	<style type="text/css">
+	body{
+		background-color:#ccc;
+	}
+	</style>
+	<title>Titles</title>
+</head>
+<body>
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#">T Training</a>
+    </div>
+
+    
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li id="programsButton" class="active"><a href="#">Programs <span class="sr-only">(current)</span></a></li>
+        <li id="usersButton" ><a href="#">Users</a></li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <form class="navbar-form navbar-left">
+        <div class="form-group">
+          <input id="searchText" type="text" class="form-control" placeholder="Search">
+        </div>
+        <button id="searchButton" type="submit" class="btn btn-default">Go!</button>
+      </form>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+
+	<div class="container-fluid">
+		<div id="content"></div>
+	</div>
+</body>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.3.0/mustache.min.js"></script>
+
+	<!-- Latest compiled and minified JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+	<script id="programs-template" type="text/template">
+	{{^programs}}
+		<div class="alert alert-danger" role="alert">Sorry, no programs found!</div>
+	{{/programs}}
+
+	<div class="row">
+		{{#programs}}
+	  <div class="col-sm-6 col-md-4">
+	    <div class="thumbnail">
+	      <img style="width:300px; height:350px;" src="{{desc}}" alt="...">
+	      <div class="caption">
+	        <h3>{{name}}</h3>
+	        <p>Duration: {{days}} days</p>
+	        <p>Goal: {{goal}}</p>
+	        <p><button class="btn btn-primary showProgramDetails" id="{{_id}}">More...</button> </p>
+	      </div>
+	    </div>
+	  </div>
+	  {{/programs}}
+	</div>
+	</script>
+
+	<script id="users-template" type="text/template">
+	{{^users}}
+		<li>No Users</li>
+	{{/users}}
+
+	{{#users}}
+		<div class="panel panel-primary">
+		  <div class="panel-heading">Users</div>
+		  <div class="panel-body">
+		    <p>
+		    Name: <a href="#">{{name}}</a><br>
+		    Age: <a href="#">{{age}}</a><br>
+		    Id: <a href="#">{{_id}}</a><br>
+		    </p>
+		  </div>
+		</div>
+	{{/users}}
+	</script>
+
+
+	<script id="program-details-template" type="text/template">
+		{{^programs}}
+			<div class="alert alert-danger" role="alert">Sorry, no programs found!</div>
+		{{/programs}}
+
+		<div class="row">
+			{{#programs}}
+		  <div class="col-sm-6 col-md-4">
+		    <div class="thumbnail">
+		      <img style="width:300px; height:350px;" src="{{desc}}" alt="...">
+		      <div class="caption">
+		        <h3>{{name}}</h3>
+		        <p>Duration: {{days}} days</p>
+		        <p>Goal: {{goal}}</p>
+		        
+		      </div>
+		    </div>
+		  </div>
+		  <div class="col-sm-6 col-md-8">
+		    <div class="thumbnail" style="overflow:hidden;">
+		      <iframe width="640" height="480" src="https://www.youtube.com/embed/y5mPEpBT_TQ" frameborder="0" allowfullscreen></iframe>
+		    </div>
+		  </div>
+		  {{/programs}}
+		</div>
+	</script>
+
+	<script>
+	$(document).on("click", ".showProgramDetails", function () {
+		var programId = $(this).attr('id');
+	    $.getJSON('http://localhost:2000/api/v1/Program/'+programId, function(data){
+			var template = $('#program-details-template').html();
+			var fix = {'programs': data}
+			var info = Mustache.to_html(template, fix);
+			$('#content').html(info)
+		})
+	});
+
+	$(function(){
+		$.getJSON('http://localhost:2000/api/v1/Program', function(data){
+			var template = $('#programs-template').html();
+			var fix = {'programs': data}
+			var info = Mustache.to_html(template, fix);
+			$('#content').html(info)
+		})
+	});
+
+	$('#usersButton').click(function(){
+		$("#programsButton").removeClass("active")
+		$('#usersButton').addClass("active")
+		$('#content').html('')
+		$.getJSON('http://localhost:2000/api/v1/User', function(data){
+			var user_template = $('#users-template').html();
+			var user_fix = {'users': data}
+			var user_info = Mustache.to_html(user_template, user_fix);
+			$('#content').html(user_info)
+		})
+	})
+
+	$('#programsButton').click(function(){
+		$("#usersButton").removeClass("active")
+		$('#programsButton').addClass("active")
+		$.getJSON('http://localhost:2000/api/v1/Program', function(data){
+			var template = $('#programs-template').html();
+			var fix = {'programs': data}
+			var info = Mustache.to_html(template, fix);
+			$('#content').html(info)
+		})
+	})
+
+	$("#searchButton").click(function(){
+		var searchTerm = $('#searchText').val();
+
+		$.getJSON('http://localhost:2000/api/v1/Program?query={"name":"~'+ searchTerm +'"}', function(data){
+			var search_template = $('#programs-template').html();
+			var search_fix = {'programs': data}
+			var search_info = Mustache.to_html(search_template, search_fix);
+			$('#content').html(search_info)
+		})
+
+	});
+
+
+	</script>
+
+
+</html>
